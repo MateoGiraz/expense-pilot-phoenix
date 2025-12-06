@@ -1,0 +1,31 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+
+  <.input field={f[:amount]} type="number" step="0.01" label="Amount" required />
+  <p class="mt-1 text-sm text-gray-500">Enter the expense amount</p>
+  
+  <.input field={f[:date]} type="date" label="Date" required />
+  <p class="mt-1 text-sm text-gray-500">When was this expense incurred?</p>
+  
+  <div class="flex items-end gap-2">
+    <div class="flex-1">
+      <.input 
+        field={f[:category_id]} 
+        type="select" 
+        label="Category" 
+        options={Enum.map(@categories, fn c -> {c.name, c.id} end)} 
+        required 
+      />
+      <p class="mt-1 text-sm text-gray-500">Select a category for this expense</p>
+    </div>
+    <.link href={~p"/categories/new"} target="_blank" class="mb-6">
+      <.button type="button">+ New Category</.button>
+    </.link>
+  </div>
+
+  <:actions>
+    <.button class="w-full">Save Expense</.button>
+  </:actions>
+</.simple_form> 

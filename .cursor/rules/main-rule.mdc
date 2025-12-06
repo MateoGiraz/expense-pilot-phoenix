@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+
+No Comments by Default: Only add comments when explicitly requested in the prompt.
+Adhere to DRY Principle: Avoid repetition in code.
+Prevent Premature Optimization: Focus on functionality and clarity before optimizing.
+Single Responsibility: Keep files and modules focused on a single purpose.
+Clear Boundaries: Maintain well-defined interfaces and responsibilities between modules.
+Concise Code: Strive for brevity; prefer one-liners when they don't compromise readability or exceed reasonable line length.

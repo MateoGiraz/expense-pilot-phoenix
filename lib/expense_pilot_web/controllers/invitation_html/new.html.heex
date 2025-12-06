@@ -1,0 +1,31 @@
+<.header>
+    Invite User
+    <:subtitle>Send an invitation to join the system</:subtitle>
+  </.header>
+  
+  <.simple_form :let={f} for={%{}} action={~p"/admin/invitations"} as={:invitation}>
+    <.error :if={@flash["error"]}>
+      <%= @flash["error"] %>
+    </.error>
+  
+    <.input 
+      field={f[:email]} 
+      type="email" 
+      label="Email" 
+      required 
+      placeholder="Enter user's email"
+    />
+  
+    <.input 
+      field={f[:area_id]} 
+      type="select" 
+      label="Area (Optional)" 
+      prompt="Select area..."
+      options={Enum.map(@areas, &{&1.name, &1.id})}
+    />
+  
+    <:actions>
+      <.button>Send Invitation</.button>
+      <.link navigate={~p"/admin/invitations"} class="ml-2">Cancel</.link>
+    </:actions>
+  </.simple_form> 

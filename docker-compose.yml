@@ -1,0 +1,159 @@
+version: '3.8'
+
+services:
+
+## API Gateway ##
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - AUTH_SERVICE_URL=http://auth-service:5439
+      - EXPENSES_SERVICE_URL=http://expenses-service:4001
+      - AUDIT_SERVICE_URL=http://audit-service:3000
+      - API_SECRET_KEY=${API_SECRET_KEY}
+    depends_on:
+      - auth-service
+      - expenses-service
+      - audit-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+## Auth Service ##
+  # Auth Service (Node.js + Prisma)
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "5439:5439"
+    environment:
+      - DATABASE_URL=postgresql://auth_user:auth_password@auth-postgres:5432/auth_service_db?sslmode=disable
+      - PORT=5439
+      - JWT_SECRET=my-super-secure-jwt-secret-key-for-development-change-in-production
+      - API_SECRET_KEY=${API_SECRET_KEY}
+      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}
+      - NEW_RELIC_APP_NAME="auth-service"
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+
+  # PostgreSQL Database for Auth Service
+  auth-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+      POSTGRES_DB: auth_service_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+## Notification Service (Python) ##
+  notification-service:
+    build: ./notification-service
+    environment:
+      - PORT=8000
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - SQS_QUEUE_URL=${SQS_QUEUE_URL}
+      - SES_FROM_EMAIL=${SES_FROM_EMAIL}
+
+## Audit Service (Rails) ##
+  audit-service:
+    build: ./audit-service
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=production
+      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+      - API_SECRET_KEY=${API_SECRET_KEY}
+      - NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
+      - NEW_RELIC_APP_NAME=audit-service
+      - NEW_RELIC_ACCOUNT_ID=${NEW_RELIC_ACCOUNT_ID}
+
+## Phoenix App (Main Expense Pilot) ##
+  # PostgreSQL Database for Phoenix App
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Phoenix App (Main Expense Pilot)
+  expense-pilot:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/expense_pilot_dev?sslmode=disable
+      - API_GATEWAY_URL=http://api-gateway:8080
+      - PHX_HOST=localhost
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - PHX_SERVER=true
+      - SQS_QUEUE_URL=${SQS_QUEUE_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+
+## Expenses Service (Go) ##
+  expenses-service:
+    build: ./expenses-service
+    ports:
+      - "4001:4001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@expenses-postgres:5432/expenses_service_db?sslmode=disable
+      - EXPENSES_SERVICE_PORT=4001
+      - API_SECRET_KEY=${API_SECRET_KEY}
+      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}
+      - NEW_RELIC_APP_NAME=expenses-service
+    depends_on:
+      expenses-postgres:
+        condition: service_healthy
+
+# PostgreSQL Database for Expenses Service
+  expenses-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: expenses_service_db
+
+    ports:
+      - "5434:5432"
+    volumes:
+      - expenses_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d expenses_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  auth_postgres_data:
+  expenses_postgres_data: 

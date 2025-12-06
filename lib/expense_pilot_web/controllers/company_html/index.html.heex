@@ -1,0 +1,42 @@
+<.header>
+  Companies
+  <:actions>
+    <.link navigate={~p"/admin/companies/new"}>
+      <.button>New Company</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="companies" rows={@companies}>
+  <:col :let={company} label="Name"><%= company.name %></:col>
+  <:col :let={company} label="Address"><%= company.address %></:col>
+  <:col :let={company} label="Website">
+    <a href={company.website} target="_blank" class="text-blue-600 hover:underline">
+      <%= company.website %>
+    </a>
+  </:col>
+  <:col :let={company} label="Logo">
+    <img src={company.logo} alt={company.name} class="h-8 w-auto" />
+  </:col>
+  
+  <:action :let={company}>
+    <.link navigate={~p"/admin/companies/#{company}"} class="text-zinc-600 hover:text-zinc-900" title="View details">
+      <.icon name="hero-eye" />
+    </.link>
+  </:action>
+  <:action :let={company}>
+    <.link navigate={~p"/admin/companies/#{company}/edit"} class="text-zinc-600 hover:text-zinc-900" title="Edit">
+      <.icon name="hero-pencil-square" />
+    </.link>
+  </:action>
+  <:action :let={company}>
+    <.link href={~p"/admin/companies/#{company}"} method="delete" data-confirm="Are you sure you want to delete this company?" class="text-zinc-600 hover:text-zinc-900" title="Delete">
+      <.icon name="hero-trash" />
+    </.link>
+  </:action>
+</.table>
+
+<div class="mt-10 text-sm text-gray-600">
+  <p>From this page you can manage the companies registered in the system.</p>
+  <p>To invite a user to a company, click on the "View details" button and then "Invite User" on the company details page.</p>
+</div> 

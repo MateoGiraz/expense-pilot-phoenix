@@ -1,0 +1,253 @@
+<div class="mx-auto">
+  <!-- App is working! -->
+  <.header>
+    Dashboard
+    <:subtitle>View NOW and manage your company's expenses</:subtitle>
+    <:actions>
+      <.link href={~p"/expenses/new"}>
+        <.button>New Expense</.button>
+      </.link>
+    </:actions>
+  </.header>
+</div>
+
+<div class="mb-8 mt-6 bg-white rounded-lg shadow p-6">
+  <h2 class="text-lg font-semibold mb-4">Filter Expenses</h2>
+  <form method="get" class="flex items-end gap-4 flex-nowrap">
+    <div class="w-full md:w-52">
+      <input
+        placeholder="Start Date"
+        type="text"
+        onfocus="(this.type='date')"
+        onblur="if(!this.value){this.type='text'}"
+        id="start_date"
+        name="start_date"
+        value={@start_date}
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+    </div>
+    <div class="w-full md:w-52">
+      <input
+        placeholder="End Date"
+        type="text"
+        onfocus="(this.type='date')"
+        onblur="if(!this.value){this.type='text'}"
+        id="end_date"
+        name="end_date"
+        value={@end_date}
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+    </div>
+    <div class="w-full md:w-64">
+      <select id="category_id" name="category_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+        <option value="">All Categories</option>
+        <%= for category <- @categories do %>
+          <option value={category.id} selected={@selected_category_id == category.id}>
+            <%= category.name %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+    <div class="w-full md:w-64">
+      <select id="user_id" name="user_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+        <option value="">All Users</option>
+        <%= for user <- @users do %>
+          <option value={user.id} selected={@selected_user_id == user.id}>
+            <%= user.email %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+    <div class="flex gap-2">
+      <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded h-10">
+        Apply Filter
+      </button>
+      <a href="/" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded h-10 flex items-center justify-center">
+        Reset
+      </a>
+    </div>
+  </form>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+  <!-- Expenses Table -->
+  <div class="xl:col-span-3 bg-white rounded-lg shadow">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-lg font-semibold">Filtered Expenses</h2>
+      <p class="text-sm text-gray-500">Showing <%= length(@expenses) %> of <%= @total_count %> expenses</p>
+    </div>
+    
+    <%= if @expenses == [] do %>
+      <div class="p-6">
+        <div class="rounded-lg bg-amber-100 p-4">
+          <p class="text-amber-800">No expenses found for the selected filters.</p>
+        </div>
+      </div>
+    <% else %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered by</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <%= for expense <- @expenses do %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= Calendar.strftime(expense.date, "%d/%m/%Y") %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <%= expense.amount %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                    <%= expense.category.name %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= expense.user.email %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div class="flex space-x-2">
+                    <.link navigate={~p"/expenses/#{expense}"} class="text-indigo-600 hover:text-indigo-900" title="View details">
+                      <.icon name="hero-eye" class="w-5 h-5" />
+                    </.link>
+                    <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) do %>
+                      <.link navigate={~p"/expenses/#{expense}/edit"} class="text-indigo-600 hover:text-indigo-900" title="Edit">
+                        <.icon name="hero-pencil-square" class="w-5 h-5" />
+                      </.link>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="p-6 flex items-center justify-between border-t border-gray-200">
+        <div class="text-sm text-gray-700">
+          Page <%= @page %> of <%= @total_pages %>
+        </div>
+        <div class="flex space-x-2">
+          <%= if @page > 1 do %>
+            <a href={~p"/?page=#{@page - 1}&start_date=#{@start_date}&end_date=#{@end_date}&category_id=#{@selected_category_id || ""}&user_id=#{@selected_user_id || ""}"} class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Previous
+            </a>
+          <% end %>
+          
+          <%= if @page < @total_pages do %>
+            <a href={~p"/?page=#{@page + 1}&start_date=#{@start_date}&end_date=#{@end_date}&category_id=#{@selected_category_id || ""}&user_id=#{@selected_user_id || ""}"} class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Next
+            </a>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Chart Section -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-lg font-semibold mb-4 mt-4">Categories by Spending</h2>
+    
+    <%= if @chart_data.values == [] do %>
+      <div class="rounded-lg bg-amber-100 p-4">
+        <p class="text-amber-800">No data available for the selected filters.</p>
+      </div>
+    <% else %>
+      <div class="mt-2 overflow-y-auto max-h-96">
+        <div class="space-y-4">
+          <%= for {cat, i} <- Enum.with_index(@category_data) do %>
+            <div class="space-y-1">
+              <div class="flex justify-between">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 rounded mr-2 chart-color" data-index={i}></div>
+                  <span class="font-medium text-sm"><%= cat.category_name %></span>
+                </div>
+                <span class="text-sm font-semibold"><%= cat.total %></span>
+              </div>
+              
+              <div class="flex justify-between text-xs text-gray-500">
+                <span><%= cat.percent_of_total %>% of total</span>
+                <%= if cat.percent_of_limit do %>
+                  <span><%= cat.percent_of_limit %>% of limit</span>
+                <% end %>
+              </div>
+              
+              <!-- Progress bar for percentage of limit (if exists) -->
+              <%= if cat.percent_of_limit do %>
+                <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                  <% percent_width = if(Decimal.compare(cat.percent_of_limit, Decimal.new(100)) == :gt, do: 100, else: cat.percent_of_limit) %>
+                  <div class={"h-1.5 rounded-full #{get_limit_bar_color(cat.percent_of_limit)}"} style={"width: #{percent_width}%"}></div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const chartData = <%= Jason.encode!(@chart_data) %>;
+    
+    if (chartData.values.length > 0) {
+      const ctx = document.getElementById('expense-chart').getContext('2d');
+      
+      // Generate random colors for each category
+      const backgroundColors = chartData.labels.map(() => {
+        const r = Math.floor(Math.random() * 200);
+        const g = Math.floor(Math.random() * 200);
+        const b = Math.floor(Math.random() * 200);
+        return `rgba(${r}, ${g}, ${b}, 0.7)`;
+      });
+      
+      // Apply colors to the legend items and chart bars
+      document.querySelectorAll('.chart-color').forEach((el, index) => {
+        el.style.backgroundColor = backgroundColors[index];
+      });
+      
+      document.querySelectorAll('.chart-color-bar').forEach((el, index) => {
+        el.style.backgroundColor = backgroundColors[index];
+      });
+      
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            data: chartData.values,
+            backgroundColor: backgroundColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw;
+                  const percentage = Math.round(context.parsed * 10) / 10;
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  });
+</script> 

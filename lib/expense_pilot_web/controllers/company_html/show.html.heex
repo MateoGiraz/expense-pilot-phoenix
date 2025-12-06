@@ -1,0 +1,64 @@
+<.header>
+  <%= @company.name %>
+  <:subtitle>Company details</:subtitle>
+  <:actions>
+    <.link navigate={~p"/admin/companies/#{@company}/edit"}>
+      <.button>Edit Company</.button>
+    </.link>
+    <.link navigate={~p"/admin/invitations/new"} class="ml-2">
+      <.button>Invite User</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+  <div class="col-span-2">
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="flex items-center mb-4">
+        <img src={@company.logo} alt={@company.name} class="h-16 w-auto mr-4" />
+        <div>
+          <h3 class="text-xl font-semibold"><%= @company.name %></h3>
+          <p class="text-gray-600"><%= @company.address %></p>
+          <a href={@company.website} target="_blank" class="text-blue-600 hover:underline"><%= @company.website %></a>
+        </div>
+      </div>
+      
+      <div class="mt-6">
+        <h4 class="text-lg font-semibold mb-2">Users</h4>
+        <.table id="users" rows={@company.users}>
+          <:col :let={user} label="Email"><%= user.email %></:col>
+          <:col :let={user} label="Area">
+            <%= if user.area do %>
+              <%= user.area.name %>
+            <% else %>
+              <span class="text-gray-400 italic">No area assigned</span>
+            <% end %>
+          </:col>
+          <:col :let={user} label="Status">
+            <%= if user.invited do %>
+              <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">Invited</span>
+            <% else %>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">Active</span>
+            <% end %>
+          </:col>
+        </.table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-lg font-semibold mb-4">Company Statistics</h3>
+    <ul class="space-y-3">
+      <li class="flex justify-between">
+        <span class="text-gray-600">Creation date</span>
+        <span><%= Calendar.strftime(@company.inserted_at, "%d/%m/%Y") %></span>
+      </li>
+      <li class="flex justify-between">
+        <span class="text-gray-600">Number of users</span>
+        <span><%= length(@company.users) %></span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<.back navigate={~p"/admin/companies"}>Back to companies</.back> 

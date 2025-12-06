@@ -1,0 +1,37 @@
+<.header>
+  Edit Company
+  <:subtitle>Update information for <%= @company.name %></:subtitle>
+</.header>
+
+<.simple_form :let={f} for={@changeset} action={~p"/admin/companies/#{@company}"} method="put">
+  <.error :if={@changeset.action}>
+    There was an error processing the form. Please check the fields.
+  </.error>
+
+  <.input field={f[:name]} type="text" label="Company Name" required />
+  
+  <.input field={f[:address]} type="text" label="Address" required />
+  
+  <.input 
+    field={f[:website]} 
+    type="url" 
+    label="Website" 
+    required 
+    pattern="https?://.+"
+    title="Must start with http:// or https://"
+  />
+  
+  <.input 
+    field={f[:logo]} 
+    type="url" 
+    label="Logo URL" 
+    required 
+    pattern="https?://.+"
+    title="Must be a valid URL starting with http:// or https://"
+  />
+
+  <:actions>
+    <.button type="submit">Save Changes</.button>
+    <.link navigate={~p"/admin/companies/#{@company}"} class="ml-2">Cancel</.link>
+  </:actions>
+</.simple_form> 

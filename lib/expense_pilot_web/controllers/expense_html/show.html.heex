@@ -1,0 +1,67 @@
+<.header>
+  Expense Details
+  <:subtitle>View expense information</:subtitle>
+  <:actions>
+    <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) do %>
+      <.link navigate={~p"/expenses/#{@expense}/edit"}>
+        <.button>Edit Expense</.button>
+      </.link>
+    <% end %>
+  </:actions>
+</.header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+  <div class="col-span-2">
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-semibold">
+            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 mr-2">
+              <%= @expense.category.name %>
+            </span>
+            Expense on <%= Calendar.strftime(@expense.date, "%B %d, %Y") %>
+          </h3>
+          <p class="text-gray-600 mt-2">
+            Registered by <%= @expense.user.email %> on <%= Calendar.strftime(@expense.registered_at, "%d/%m/%Y %H:%M") %>
+          </p>
+        </div>
+        <div class="text-3xl font-bold text-emerald-600">
+          <%= @expense.amount %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-lg font-semibold mb-4">Expense Information</h3>
+    <ul class="space-y-3">
+      <li class="flex justify-between">
+        <span class="text-gray-600">Date</span>
+        <span><%= Calendar.strftime(@expense.date, "%d/%m/%Y") %></span>
+      </li>
+      <li class="flex justify-between">
+        <span class="text-gray-600">Amount</span>
+        <span class="font-semibold"><%= @expense.amount %></span>
+      </li>
+      <li class="flex justify-between">
+        <span class="text-gray-600">Category</span>
+        <span><%= @expense.category.name %></span>
+      </li>
+      <li class="flex justify-between">
+        <span class="text-gray-600">Created</span>
+        <span><%= Calendar.strftime(@expense.inserted_at, "%d/%m/%Y") %></span>
+      </li>
+    </ul>
+    
+    <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) do %>
+      <div class="mt-6 pt-6 border-t border-gray-200">
+        <.link href={~p"/expenses/#{@expense}"} method="delete" data-confirm="Are you sure you want to delete this expense?" class="flex items-center text-red-600 hover:text-red-800">
+          <.icon name="hero-trash" class="w-5 h-5 mr-2" />
+          <span>Delete this expense</span>
+        </.link>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<.back navigate={~p"/expenses"} class="mt-6">Back to expenses</.back> 

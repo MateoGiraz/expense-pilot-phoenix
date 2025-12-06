@@ -1,0 +1,10 @@
+<.header>
+  Edit Expense <%= @expense.id %>
+  <:subtitle>Use this form to edit an existing expense</:subtitle>
+</.header>
+
+<div class="bg-white shadow rounded-lg p-6 mt-6">
+  <.expense_form changeset={@changeset} action={~p"/expenses/#{@expense}"} categories={@categories} />
+</div>
+
+<.back navigate={~p"/expenses"} class="mt-6">Back to expenses</.back> 

@@ -1,0 +1,72 @@
+{
+  "name": "auth-service",
+  "version": "1.0.0",
+  "description": "Authentication and Authorization Microservice",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest --coverage --detectOpenHandles --forceExit",
+    "test:watch": "jest --watch --detectOpenHandles",
+    "test:ci": "jest --coverage --ci --detectOpenHandles --forceExit --maxWorkers=2",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:reset": "prisma migrate reset",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "newrelic": "latest"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "prisma": "^5.7.1",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "@types/jest": "^29.5.8",
+    "jest-environment-node": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 95,
+        "functions": 92,
+        "lines": 98,
+        "statements": 98
+      }
+    },
+    "testMatch": [
+      "**/__tests__/**/*.test.js",
+      "**/*.test.js"
+    ],
+    "setupFilesAfterEnv": ["<rootDir>/src/__tests__/setup.js"],
+    "testPathIgnorePatterns": [
+      "<rootDir>/src/__tests__/setup.js"
+    ]
+  },
+  "keywords": [
+    "authentication",
+    "authorization",
+    "microservice",
+    "express",
+    "prisma"
+  ],
+  "author": "",
+  "license": "MIT"
+}

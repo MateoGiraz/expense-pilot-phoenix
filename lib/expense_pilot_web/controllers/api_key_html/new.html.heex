@@ -1,0 +1,17 @@
+<.header>
+  New API Key
+  <:subtitle>Create a new API key for integration</:subtitle>
+</.header>
+
+<.simple_form :let={f} for={@changeset} action={~p"/admin/api-keys"}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+
+  <.input field={f[:name]} type="text" label="Name" required placeholder="Enter a descriptive name for this API key" />
+
+  <:actions>
+    <.button>Generate API Key</.button>
+    <.link navigate={~p"/admin/api-keys"} class="ml-2">Cancel</.link>
+  </:actions>
+</.simple_form> 

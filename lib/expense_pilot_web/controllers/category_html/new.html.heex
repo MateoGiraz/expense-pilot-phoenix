@@ -1,0 +1,10 @@
+<.header>
+  New Category
+  <:subtitle>Create a new category for expenses</:subtitle>
+</.header>
+
+<div class="bg-white shadow rounded-lg p-6 mt-6">
+  <.category_form changeset={@changeset} action={~p"/categories"} />
+</div>
+
+<.back navigate={~p"/categories"} class="mt-6">Back to categories</.back> 

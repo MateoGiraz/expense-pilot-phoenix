@@ -1,0 +1,12 @@
+json.id @audit_log.id
+json.action @audit_log.action
+json.resource_type @audit_log.resource_type
+json.resource_id @audit_log.resource_id
+json.data @audit_log.data
+json.user_id @audit_log.user_id
+json.user_email @audit_log.user_email
+json.company_id @audit_log.company_id
+json.created_at @audit_log.created_at
+json.updated_at @audit_log.updated_at
+
+json.message 'Audit log created successfully' 

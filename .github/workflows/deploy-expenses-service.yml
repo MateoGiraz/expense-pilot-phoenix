@@ -1,0 +1,109 @@
+name: Deploy Expenses Service
+
+on:
+  push:
+    tags:
+      - 'expenses-service-*'
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: expense-pilot/expenses-service
+  ECS_CLUSTER: expense-pilot-cluster
+  ECS_SERVICE: expenses-service
+
+jobs:
+  deploy:
+    name: Deploy Expenses Service
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        cd expenses-service
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Create task definition
+      run: |
+        cat > task-definition.json << EOF
+        {
+          "family": "${{ env.ECS_SERVICE }}",
+          "networkMode": "awsvpc",
+          "requiresCompatibilities": ["FARGATE"],
+          "cpu": "256",
+          "memory": "512",
+          "executionRoleArn": "arn:aws:iam::170107269579:role/ecsTaskExecutionRole",
+          "containerDefinitions": [
+            {
+              "name": "${{ env.ECS_SERVICE }}",
+              "image": "${{ steps.build-image.outputs.image }}",
+              "portMappings": [
+                {
+                  "containerPort": 4001,
+                  "protocol": "tcp"
+                }
+              ],
+              "environment": [
+                {
+                  "name": "DATABASE_URL",
+                  "value": "${{ secrets.EXPENSES_DATABASE_URL }}"
+                },
+                {
+                  "name": "EXPENSES_SERVICE_PORT",
+                  "value": "4001"
+                },
+                {
+                  "name": "API_SECRET_KEY",
+                  "value": "${{ secrets.API_SECRET_KEY }}"
+                },
+                {
+                  "name": "NEW_RELIC_LICENSE_KEY",
+                  "value": "${{ secrets.NEW_RELIC_LICENSE_KEY }}"
+                },
+                {
+                  "name": "NEW_RELIC_APP_NAME",
+                  "value": "expenses-service"
+                }
+              ],
+              "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                  "awslogs-group": "/ecs/${{ env.ECS_SERVICE }}",
+                  "awslogs-region": "${{ env.AWS_REGION }}",
+                  "awslogs-stream-prefix": "ecs"
+                }
+              }
+            }
+          ]
+        }
+        EOF
+
+    - name: Deploy to Amazon ECS
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        service: ${{ env.ECS_SERVICE }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        desired-count: 1
+        wait-for-service-stability: true 

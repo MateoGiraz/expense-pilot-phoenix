@@ -1,0 +1,44 @@
+<div class="mx-auto max-w-2xl py-8">
+  <h1 class="text-xl font-bold mb-4">Select a Company</h1>
+  <p class="mb-6">As a superadmin, you need to select a company to view or manage.</p>
+  
+  <%= if Enum.empty?(@companies) do %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+      <div class="py-5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No companies found</h3>
+        <p class="mt-1 text-sm text-gray-500">You need to create a company first before you can select one.</p>
+        <div class="mt-6">
+          <a href={~p"/admin/companies/new"} class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Create Company
+          </a>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul role="list" class="divide-y divide-gray-200">
+        <%= for company <- @companies do %>
+          <li>
+            <div class="px-4 py-4 flex items-center justify-between">
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-indigo-600 truncate"><%= company.name %></p>
+              </div>
+              <div class="ml-4 flex-shrink-0">
+                <.form for={%{}} action={~p"/company-selector/select"} method="post">
+                  <input type="hidden" name="company_id" value={company.id} />
+                  <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Select</button>
+                </.form>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div> 

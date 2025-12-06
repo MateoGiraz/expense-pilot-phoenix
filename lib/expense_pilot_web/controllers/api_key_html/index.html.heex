@@ -1,0 +1,34 @@
+<.header>
+  API Keys
+  <:subtitle>Manage your API keys for integration</:subtitle>
+  <:actions>
+    <.link navigate={~p"/admin/api-keys/new"}>
+      <.button>New API Key</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="api_keys" rows={@api_keys}>
+  <:col :let={api_key} label="Name"><%= api_key.name %></:col>
+  <:col :let={api_key} label="Created"><%= Calendar.strftime(api_key.inserted_at, "%Y-%m-%d %H:%M") %></:col>
+
+  <:action :let={api_key}>
+    <.link href={~p"/admin/api-keys/#{api_key}"} method="delete" data-confirm="Are you sure?" class="text-zinc-600 hover:text-zinc-900">
+      <.icon name="hero-trash" />
+    </.link>
+  </:action>
+</.table>
+
+<div class="mt-10">
+  <h3 class="text-lg font-semibold mb-3">How to Use</h3>
+  <div class="bg-gray-50 p-4 rounded-lg">
+    <p class="mb-2">Include your API key in every request to our REST API endpoints:</p>
+    <pre class="bg-gray-800 text-white p-3 rounded overflow-x-auto"><code>curl -H "X-API-Key: your-api-key-here" https://example.com/api/top-categories</code></pre>
+    
+    <h4 class="text-md font-semibold mt-4 mb-2">Available Endpoints</h4>
+    <ul class="list-disc pl-5 space-y-1">
+      <li><code>/api/top-categories</code> - Get the top 3 categories with most expenses</li>
+      <li><code>/api/categories/:id/expenses?date_from=YYYY-MM-DD&date_to=YYYY-MM-DD</code> - Get expenses for a specific category in a date range</li>
+    </ul>
+  </div>
+</div> 

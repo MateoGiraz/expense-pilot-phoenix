@@ -1,0 +1,26 @@
+valid_log:
+  action: "create"
+  resource_type: "User"
+  resource_id: 1
+  user_id: 1
+  company_id: 1
+  user_email: "test@example.com"
+  data: { "name": "John Doe", "email": "john@example.com" }
+
+another_log:
+  action: "update"
+  resource_type: "Project"
+  resource_id: 2
+  user_id: 2
+  company_id: 1
+  user_email: "admin@example.com"
+  data: { "title": "Updated Project" }
+
+different_company_log:
+  action: "delete"
+  resource_type: "Task"
+  resource_id: 3
+  user_id: 3
+  company_id: 2
+  user_email: "manager@company2.com"
+  data: { "task_id": 3 } 

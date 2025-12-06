@@ -1,0 +1,78 @@
+<header class="px-4 sm:px-6 lg:px-8">
+  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
+    <div class="flex items-center gap-4">
+      <a href="/">
+        <img src={~p"/images/logo.svg"} width="36" />
+      </a>
+      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
+        ExpensePilot
+      </p>
+      <%= if assigns[:current_user] && ExpensePilot.Accounts.User.is_superadmin?(@current_user) && assigns[:current_company] do %>
+        <div class="ml-4 text-sm font-medium text-blue-600">
+          <span>Managing: <%= @current_company.name %></span>
+        </div>
+      <% end %>
+    </div>
+    <%= if assigns[:current_user] do %>
+      <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
+        <%= if !ExpensePilot.Accounts.User.is_superadmin?(@current_user) || assigns[:current_company] do %>
+          <a href={~p"/"} class="hover:text-zinc-700">
+            Dashboard
+          </a>
+          <a href={~p"/expenses"} class="hover:text-zinc-700">
+            Expenses
+          </a>
+          <a href={~p"/categories"} class="hover:text-zinc-700">
+            Categories
+          </a>
+          <a href={~p"/areas"} class="hover:text-zinc-700">
+            Areas
+          </a>
+          <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) && assigns[:current_company] do %>
+            <a href={~p"/admin/api-keys"} class="hover:text-zinc-700">
+              Api Keys
+            </a>
+          <% end %>
+        <% end %>
+
+        <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) do %>
+          <a href={~p"/admin/audit-logs"} class="rounded-lg bg-blue-100 px-2 py-1 hover:bg-blue-200/80 text-blue-700">
+            Audit Logs
+          </a>
+        <% end %>
+        
+        <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) do %>
+          <a href={~p"/company-selector"} class="rounded-lg bg-blue-100 px-2 py-1 hover:bg-blue-200/80 text-blue-700">
+            <%= if assigns[:current_company], do: "Change Company", else: "Select Company" %>
+          </a>
+        <% end %>
+        
+        <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) do %>
+          <a href={~p"/admin/companies"} class="rounded-lg bg-blue-100 px-2 py-1 hover:bg-blue-200/80 text-blue-700">
+            Companies
+          </a>
+        <% end %>
+        
+        <!-- Current User Info -->
+        <div class="flex items-center gap-2 text-sm bg-green-50 border border-green-200 rounded-lg px-3 py-1">
+          <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-green-800 font-medium">
+            ID: <%= @current_user.id %> | <%= @current_user.email %>
+          </span>
+        </div>
+        
+        <a href={~p"/logout"} class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80">
+          Logout <span aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    <% end %>
+  </div>
+</header>
+<main class="px-4 py-20 sm:px-6 lg:px-8">
+  <div class={"mx-auto #{Map.get(assigns, :layout_width, "max-w-4xl")}"}>
+    <.flash_group flash={@flash} />
+    {@inner_content}
+  </div>
+</main>

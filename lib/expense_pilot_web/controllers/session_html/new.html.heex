@@ -1,0 +1,22 @@
+<div class="mx-auto max-w-sm">
+  <.header class="text-center">
+    Login
+    <:subtitle>
+      Don't have an account?
+      <span class="text-brand-500">Contact your administrator to receive an invitation</span>
+    </:subtitle>
+  </.header>
+
+  <.simple_form :let={f} for={%{}} as={:session} action={~p"/login"}>
+    <.error :if={@flash["error"]}>
+      <%= @flash["error"] %>
+    </.error>
+
+    <.input field={f[:email]} type="email" label="Email" required />
+    <.input field={f[:password]} type="password" label="Password" required />
+
+    <:actions>
+      <.button class="w-full">Login</.button>
+    </:actions>
+  </.simple_form>
+</div> 

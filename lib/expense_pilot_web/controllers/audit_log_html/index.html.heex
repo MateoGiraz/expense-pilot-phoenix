@@ -1,0 +1,123 @@
+<.header>
+  Audit Logs
+  <:subtitle>View activity history for your company</:subtitle>
+</.header>
+
+<!-- Filters Form -->
+<div class="bg-white shadow rounded-lg p-6 mb-6">
+  <h3 class="text-lg font-medium text-gray-900 mb-4">Filter Audit Logs</h3>
+  
+  <.form :let={f} for={%{}} as={:filter} phx-submit="filter" method="get" action={~p"/admin/audit-logs"} class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div>
+      <.label for="start_date">Start Date</.label>
+      <.input type="date" field={f[:start_date]} name="start_date" value={@filters["start_date"]} />
+    </div>
+    
+    <div>
+      <.label for="end_date">End Date</.label>
+      <.input type="date" field={f[:end_date]} name="end_date" value={@filters["end_date"]} />
+    </div>
+    
+    <div>
+      <.label for="user_email">User Email</.label>
+      <.input type="text" field={f[:user_email]} name="user_email" value={@filters["user_email"]} placeholder="user@example.com" />
+    </div>
+    
+    <div>
+      <.label for="audit_action">Action</.label>
+      <.input type="select" field={f[:audit_action]} name="audit_action" value={@filters["audit_action"]} options={[
+        {"All Actions", ""},
+        {"Create", "create"},
+        {"Update", "update"},
+        {"Delete", "delete"}
+      ]} />
+    </div>
+    
+    <div>
+      <.label for="resource_type">Resource Type</.label>
+      <.input type="select" field={f[:resource_type]} name="resource_type" value={@filters["resource_type"]} options={[
+        {"All Resources", ""},
+        {"Category", "Category"},
+        {"Expense", "Expense"},
+        {"Company", "Company"},
+        {"Area", "Area"},
+        {"API Key", "ApiKey"}
+      ]} />
+    </div>
+    
+    <div class="flex items-end">
+      <.button type="submit" class="w-full">Filter</.button>
+    </div>
+  </.form>
+  
+  <%= if @filters != %{} do %>
+    <div class="mt-4">
+      <.link navigate={~p"/admin/audit-logs"} class="text-sm text-indigo-600 hover:text-indigo-500">
+        Clear all filters
+      </.link>
+    </div>
+  <% end %>
+</div>
+
+<%= if @audit_logs == [] do %>
+  <div class="rounded-lg bg-amber-100 p-4 my-4">
+    <p class="text-amber-800">No audit logs found.</p>
+  </div>
+<% else %>
+  <div class="rounded-lg bg-blue-100 p-4 my-4">
+    <p class="text-blue-800">Showing <%= length(@audit_logs) %> of <%= @total_count %> audit logs for your company.</p>
+  </div>
+<% end %>
+
+<.table id="audit_logs" rows={@audit_logs}>
+  <:col :let={log} label="Action">
+    <span class={
+      case log["action"] do
+        "create" -> "bg-green-100 text-green-800"
+        "update" -> "bg-blue-100 text-blue-800"
+        "delete" -> "bg-red-100 text-red-800"
+        _ -> "bg-gray-100 text-gray-800"
+      end
+      <> " px-2 py-1 rounded text-xs font-semibold"
+    }>
+      <%= String.upcase(log["action"]) %>
+    </span>
+  </:col>
+  <:col :let={log} label="Resource">
+    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+      <%= String.upcase(log["resource_type"]) %> #<%= log["resource_id"] %>
+    </span>
+  </:col>
+  <:col :let={log} label="User">
+    <%= log["user_email"] || "Unknown" %>
+  </:col>
+  <:col :let={log} label="Date">
+    <%= if log["created_at"] do %>
+      <%= case DateTime.from_iso8601(log["created_at"]) do %>
+        <% {:ok, datetime, _} -> %>
+          <%= Calendar.strftime(datetime, "%d/%m/%Y %H:%M") %>
+        <% _ -> %>
+          <%= log["created_at"] %>
+      <% end %>
+    <% else %>
+      Unknown
+    <% end %>
+  </:col>
+  
+  <:col :let={log} label="Details">
+    <%= if log["data"] do %>
+      <details class="text-xs">
+        <summary class="cursor-pointer text-indigo-600 hover:text-indigo-500">View Data</summary>
+        <pre class="mt-2 bg-gray-100 p-2 rounded text-xs overflow-x-auto"><%= Jason.encode!(log["data"], pretty: true) %></pre>
+      </details>
+    <% else %>
+      <span class="text-gray-400">No data</span>
+    <% end %>
+  </:col>
+</.table>
+
+<div class="mt-10 text-sm text-gray-600">
+  <p>This page shows all activity history for your company.</p>
+  <p>You can see who made changes, what was changed, and when the changes occurred.</p>
+  <p>Use the filters above to narrow down the results by date, user, action type, or resource type.</p>
+</div> 

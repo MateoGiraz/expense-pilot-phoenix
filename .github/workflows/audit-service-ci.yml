@@ -1,0 +1,60 @@
+name: Audit Service CI
+
+on:
+  pull_request:
+    paths:
+      - 'audit-service/**'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'audit-service/**'
+
+defaults:
+  run:
+    working-directory: audit-service
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config bc
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: audit-service/.ruby-version
+          bundler-cache: true
+          working-directory: audit-service
+
+      - name: Run tests with coverage
+        env:
+          RAILS_ENV: test
+        run: |
+          bin/rails db:test:prepare
+          bin/rails test
+
+      - name: Log coverage results
+        run: |
+          if [ -f coverage/.last_run.json ]; then
+            COVERAGE=$(cat coverage/.last_run.json | grep -o '"covered_percent":[0-9.]*' | cut -d':' -f2)
+            echo "📊 Coverage Report:"
+            echo "Coverage: $COVERAGE%"
+            echo "Target: 100% (informational only)"
+            
+            if [ $(echo "$COVERAGE >= 100" | bc -l) -eq 1 ]; then
+              echo "🎉 Excellent! 100% coverage achieved!"
+            elif [ $(echo "$COVERAGE >= 95" | bc -l) -eq 1 ]; then
+              echo "✅ Great coverage! Close to 100%"
+            elif [ $(echo "$COVERAGE >= 90" | bc -l) -eq 1 ]; then
+              echo "👍 Good coverage! Consider improving to reach 100%"
+            else
+              echo "⚠️  Coverage could be improved. Target is 100%"
+            fi
+          else
+            echo "⚠️  Coverage report not found"
+          fi

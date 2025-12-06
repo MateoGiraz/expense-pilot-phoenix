@@ -1,0 +1,35 @@
+name: Auth Service CI
+
+on:
+  pull_request:
+    paths:
+      - 'auth-service/**'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'auth-service/**'
+
+defaults:
+  run:
+    working-directory: auth-service
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: auth-service/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test

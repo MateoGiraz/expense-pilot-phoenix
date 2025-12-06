@@ -1,0 +1,39 @@
+<.header>
+  Register New Company
+  <:subtitle>Enter the client company information</:subtitle>
+</.header>
+
+<.simple_form :let={f} for={@changeset} action={~p"/admin/companies"}>
+  <.error :if={@changeset.action}>
+    There was an error processing the form. Please check the fields.
+  </.error>
+
+  <.input field={f[:name]} type="text" label="Company Name" required placeholder="Company name" />
+  
+  <.input field={f[:address]} type="text" label="Address" required placeholder="Full address" />
+  
+  <.input 
+    field={f[:website]} 
+    type="url" 
+    label="Website" 
+    required 
+    placeholder="https://www.example.com" 
+    pattern="https?://.+"
+    title="Must start with http:// or https://"
+  />
+  
+  <.input 
+    field={f[:logo]} 
+    type="url" 
+    label="Logo URL" 
+    required 
+    placeholder="https://www.example.com/logo.png"
+    pattern="https?://.+"
+    title="Must be a valid URL starting with http:// or https://"
+  />
+
+  <:actions>
+    <.button type="submit">Register Company</.button>
+    <.link navigate={~p"/admin/companies"} class="ml-2">Cancel</.link>
+  </:actions>
+</.simple_form> 

@@ -1,0 +1,93 @@
+<.header>
+  Expenses
+  <:actions>
+    <.link href={~p"/expenses/new"}>
+      <.button class="px-4">New Expense</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<!-- Notifications Toggle for Members -->
+<%= if @current_user.role == "member" do %>
+  <div class="bg-white shadow rounded-lg p-4 mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <.icon name="hero-bell" class="h-5 w-5 text-gray-500" />
+        <div>
+          <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
+          <p class="text-xs text-gray-500">Get notified when expenses are created, updated, or deleted in your area</p>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <form method="post" action={~p"/expenses/toggle-notifications"} class="inline">
+          <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              name="expense_notifications" 
+              value="true"
+              class="sr-only peer"
+              checked={@current_user.expense_notifications}
+              onchange="this.form.submit()"
+            />
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+          </label>
+        </form>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<%= if @expenses == [] do %>
+  <div class="rounded-lg bg-amber-100 p-4 my-4">
+    <p class="text-amber-800">No expenses found. Please create a new expense.</p>
+  </div>
+<% end %>
+
+<.table id="expenses" rows={@expenses}>
+  <:col :let={expense} label="ID"><%= expense.id %></:col>
+  <:col :let={expense} label="Date"><%= expense.date %></:col>
+  <:col :let={expense} label="Amount"><%= expense.amount %></:col>
+  <:col :let={expense} label="Category">
+    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+      <%= expense.category.name %>
+    </span>
+  </:col>
+  <:col :let={expense} label="Registered by"><%= expense.user.email %></:col>
+  <:col :let={expense} label="Registered at">
+    <%= Calendar.strftime(expense.registered_at, "%d/%m/%Y %H:%M") %>
+  </:col>
+  
+  <:action :let={expense}>
+    <.link navigate={~p"/expenses/#{expense}"} class="text-zinc-600 hover:text-zinc-900" title="View details">
+      <.icon name="hero-eye" />
+    </.link>
+  </:action>
+  <:action :let={expense}>
+    <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) do %>
+      <.link navigate={~p"/expenses/#{expense}/edit"} class="text-zinc-600 hover:text-zinc-900" title="Edit">
+        <.icon name="hero-pencil-square" />
+      </.link>
+    <% else %>
+      <span class="text-zinc-300">
+        <.icon name="hero-pencil-square" />
+      </span>
+    <% end %>
+  </:action>
+  <:action :let={expense}>
+    <%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user) do %>
+      <.link href={~p"/expenses/#{expense}"} method="delete" data-confirm="Are you sure you want to delete this expense?" class="text-zinc-600 hover:text-zinc-900" title="Delete">
+        <.icon name="hero-trash" />
+      </.link>
+    <% else %>
+      <span class="text-zinc-300">
+        <.icon name="hero-trash" />
+      </span>
+    <% end %>
+  </:action>
+</.table>
+
+<div class="mt-10 text-sm text-gray-600">
+  <p>From this page you can manage your company's expenses.</p>
+  <p><%= if ExpensePilot.Accounts.User.is_superadmin?(@current_user), do: "As an administrator, you can edit and delete expenses.", else: "Only administrators can edit or delete expenses." %></p>
+</div> 

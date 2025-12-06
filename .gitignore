@@ -1,0 +1,69 @@
+# The directory Mix will write compiled artifacts to.
+/_build/
+
+# If you run "mix test --cover", coverage assets end up here.
+/cover/
+
+# The directory Mix downloads your dependencies sources to.
+/deps/
+
+# Where 3rd-party dependencies like ExDoc output generated docs.
+/doc/
+
+# Ignore .fetch files in case you like to edit your project deps locally.
+/.fetch
+
+# If the VM crashes, it generates a dump, let's ignore it too.
+erl_crash.dump
+
+# Also ignore archive artifacts (built via "mix archive.build").
+*.ez
+
+# Temporary files, for example, from tests.
+/tmp/
+
+# Ignore package tarball (built via "mix hex.build").
+expense_pilot-*.tar
+
+# Ignore assets that are produced by build tools.
+/priv/static/assets/
+
+# Ignore digested assets cache.
+/priv/static/cache_manifest.json
+
+# In case you use Node.js/npm, you want to ignore these.
+npm-debug.log
+/assets/node_modules/
+
+# Environment variables
+.env
+
+
+## Audit Service
+
+# Reglas para audit-service (Rails API)
+# Estas reglas se aplican a archivos y directorios dentro de 'audit-service/'
+
+# Ignorar configuración de Bundler
+/audit-service/.bundle
+
+# Ignorar todos los archivos de entorno
+/audit-service/.env*
+
+# Ignorar todos los archivos de log y temporales
+/audit-service/log/*
+/audit-service/tmp/*
+!/audit-service/log/.keep
+!/audit-service/tmp/.keep
+
+# Ignorar archivos .pid, pero mantener el directorio
+/audit-service/tmp/pids/*
+!/audit-service/tmp/pids/
+!/audit-service/tmp/pids/.keep
+
+# Ignorar almacenamiento (archivos subidos y bases de datos SQLite)
+/audit-service/storage/*
+!/audit-service/storage/.keep
+/audit-service/tmp/storage/*
+!/audit-service/tmp/storage/
+!/audit-service/tmp/storage/.keep

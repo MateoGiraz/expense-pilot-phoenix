@@ -1,0 +1,66 @@
+<.header>
+  Categories
+  <:actions>
+    <.link href={~p"/categories/new"}>
+      <.button>New Category</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<%= if @categories == [] do %>
+  <div class="rounded-lg bg-amber-100 p-4 my-4">
+    <p class="text-amber-800">No categories found. Please create a new category.</p>
+  </div>
+<% end %>
+
+<.table id="categories" rows={@categories}>
+  <:col :let={category} label="Name"><%= category.name %></:col>
+  <:col :let={category} label="Description"><%= category.description %></:col>
+  <:col :let={category} label="Expense Limit">
+    <%= if category.expense_limit do %>
+      <%= category.expense_limit %>
+    <% else %>
+      <span class="text-gray-400">No limit</span>
+    <% end %>
+  </:col>
+  <:col :let={category} label="Current Spending">
+    <%= if category.expense_limit do %>
+      <div class="flex items-center">
+        <div class="mr-2"><%= category.current_spending %> (<%= category.spending_percent %>%)</div>
+        <div class="w-24 bg-gray-200 rounded-full h-2.5">
+          <% 
+            percent_width = cond do
+              is_nil(category.spending_percent) -> 0
+              Decimal.compare(category.spending_percent, Decimal.new(100)) == :gt -> 100
+              true -> Decimal.to_float(category.spending_percent)
+            end
+          %>
+          <div class={"h-2.5 rounded-full #{get_progress_color(category.spending_percent)}"} style={"width: #{percent_width}%"}></div>
+        </div>
+      </div>
+    <% else %>
+      <%= category.current_spending %>
+    <% end %>
+  </:col>
+  
+  <:action :let={category}>
+    <.link navigate={~p"/categories/#{category}"} class="text-zinc-600 hover:text-zinc-900" title="View details">
+      <.icon name="hero-eye" />
+    </.link>
+  </:action>
+  <:action :let={category}>
+    <.link navigate={~p"/categories/#{category}/edit"} class="text-zinc-600 hover:text-zinc-900" title="Edit">
+      <.icon name="hero-pencil-square" />
+    </.link>
+  </:action>
+  <:action :let={category}>
+    <.link href={~p"/categories/#{category}"} method="delete" data-confirm="Are you sure you want to delete this category?" class="text-zinc-600 hover:text-zinc-900" title="Delete">
+      <.icon name="hero-trash" />
+    </.link>
+  </:action>
+</.table>
+
+<div class="mt-10 text-sm text-gray-600">
+  <p>From this page you can manage the categories for your company's expenses.</p>
+  <p>Categories help you organize and track expenses by different types.</p>
+</div> 
